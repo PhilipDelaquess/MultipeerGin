@@ -9,10 +9,13 @@
 import UIKit
 
 class ViewController: UIViewController {
+    
+    @IBOutlet weak var statusLabel: UILabel!
+    let service = ServiceManager();
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        service.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -23,3 +26,18 @@ class ViewController: UIViewController {
 
 }
 
+extension ViewController : ServiceManagerDelegate {
+    func connectedToOpponent() {
+        OperationQueue.main.addOperation {
+            self.statusLabel!.text = "Connected. Yay!"
+        }
+    }
+    
+    func disconnectedFromOpponent() {
+        OperationQueue.main.addOperation {
+            self.statusLabel!.text = "Shit! Came unconnected"
+        }
+    }
+    
+    
+}

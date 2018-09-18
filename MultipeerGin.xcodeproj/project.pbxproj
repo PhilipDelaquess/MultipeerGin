@@ -7,12 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */; };
 		D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887022026B71700D11FF7 /* AppDelegate.swift */; };
 		D4E887052026B71700D11FF7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887042026B71700D11FF7 /* ViewController.swift */; };
 		D4E887082026B71700D11FF7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E887062026B71700D11FF7 /* Main.storyboard */; };
 		D4E8870A2026B71700D11FF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4E887092026B71700D11FF7 /* Assets.xcassets */; };
 		D4E8870D2026B71700D11FF7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4E8870B2026B71700D11FF7 /* LaunchScreen.storyboard */; };
 		D4E887182026B71800D11FF7 /* MultipeerGinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887172026B71800D11FF7 /* MultipeerGinTests.swift */; };
+		D4E8872520312DFA00D11FF7 /* Suit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E8872420312DFA00D11FF7 /* Suit.swift */; };
+		D4E8872720312FA100D11FF7 /* Face.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E8872620312FA100D11FF7 /* Face.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
 		D4E886FF2026B71700D11FF7 /* MultipeerGin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipeerGin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E887022026B71700D11FF7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4E887042026B71700D11FF7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -36,6 +40,9 @@
 		D4E887132026B71800D11FF7 /* MultipeerGinTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipeerGinTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E887172026B71800D11FF7 /* MultipeerGinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerGinTests.swift; sourceTree = "<group>"; };
 		D4E887192026B71800D11FF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D4E887222026B85500D11FF7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D4E8872420312DFA00D11FF7 /* Suit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Suit.swift; sourceTree = "<group>"; };
+		D4E8872620312FA100D11FF7 /* Face.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Face.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +66,7 @@
 		D4E886F62026B71700D11FF7 = {
 			isa = PBXGroup;
 			children = (
+				D4E887222026B85500D11FF7 /* README.md */,
 				D4E887012026B71700D11FF7 /* MultipeerGin */,
 				D4E887162026B71800D11FF7 /* MultipeerGinTests */,
 				D4E887002026B71700D11FF7 /* Products */,
@@ -77,12 +85,14 @@
 		D4E887012026B71700D11FF7 /* MultipeerGin */ = {
 			isa = PBXGroup;
 			children = (
+				D4E8872320312DCA00D11FF7 /* Model */,
 				D4E887022026B71700D11FF7 /* AppDelegate.swift */,
 				D4E887042026B71700D11FF7 /* ViewController.swift */,
 				D4E887062026B71700D11FF7 /* Main.storyboard */,
 				D4E887092026B71700D11FF7 /* Assets.xcassets */,
 				D4E8870B2026B71700D11FF7 /* LaunchScreen.storyboard */,
 				D4E8870E2026B71800D11FF7 /* Info.plist */,
+				D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */,
 			);
 			path = MultipeerGin;
 			sourceTree = "<group>";
@@ -94,6 +104,15 @@
 				D4E887192026B71800D11FF7 /* Info.plist */,
 			);
 			path = MultipeerGinTests;
+			sourceTree = "<group>";
+		};
+		D4E8872320312DCA00D11FF7 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D4E8872420312DFA00D11FF7 /* Suit.swift */,
+				D4E8872620312FA100D11FF7 /* Face.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,8 +218,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4E8872720312FA100D11FF7 /* Face.swift in Sources */,
 				D4E887052026B71700D11FF7 /* ViewController.swift in Sources */,
+				D4E8872520312DFA00D11FF7 /* Suit.swift in Sources */,
 				D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */,
+				D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
