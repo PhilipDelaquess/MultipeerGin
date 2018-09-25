@@ -20,9 +20,9 @@ class Card: NSObject {
         return byAbbreviation[abbreviation]
     }
 
-    // Return the Card with the given suit and face, if any
-    static func by (suit: Suit, face: Face) -> Card? {
-        return by(abbreviation: face.rawValue + String(suit.rawValue))
+    // Return the Card with the given suit and face
+    static func by (suit: Suit, face: Face) -> Card {
+        return by(abbreviation: face.rawValue + String(suit.rawValue))!
     }
     
     // Return a list of all Cards
