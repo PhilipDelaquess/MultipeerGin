@@ -16,6 +16,10 @@ class ServiceManager : NSObject {
     private let serviceAdvertiser : MCNearbyServiceAdvertiser
     private let serviceBrowser : MCNearbyServiceBrowser
     
+    private let localUuid = UUID().uuidString.lowercased()
+    private var remoteUuid: String?
+    private var remoteConnected = false
+    
     lazy var session : MCSession = {
         let session = MCSession(peer: self.myPeerId, securityIdentity: nil, encryptionPreference: .required)
         session.delegate = self
@@ -25,15 +29,18 @@ class ServiceManager : NSObject {
     var delegate : ServiceManagerDelegate?
     
     override init () {
-        self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerId, discoveryInfo: nil, serviceType: ServiceType)
+        let info = ["uuid" : localUuid]
+        self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerId, discoveryInfo: info, serviceType: ServiceType)
         self.serviceBrowser = MCNearbyServiceBrowser(peer: myPeerId, serviceType: ServiceType)
         
         super.init()
         
         self.serviceAdvertiser.delegate = self
+        NSLog("%@", "PLD about to start advertising")
         self.serviceAdvertiser.startAdvertisingPeer()
         
         self.serviceBrowser.delegate = self
+        NSLog("%@", "PLD about to start browsing")
         self.serviceBrowser.startBrowsingForPeers()
     }
     
@@ -56,6 +63,25 @@ class ServiceManager : NSObject {
         
     }
     
+    func discoveredPeer(withUuid uuid : String?) {
+        remoteUuid = uuid
+        if remoteConnected {
+            notifyDelegate()
+        }
+    }
+    
+    func connectedPeer () {
+        remoteConnected = true
+        if remoteUuid != nil {
+            notifyDelegate()
+        }
+    }
+    
+    func notifyDelegate () {
+        let role = remoteUuid! > localUuid ? "slave" : "master"
+        self.delegate?.connectedToOpponent(withRole: role)
+    }
+    
 }
 
 extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
@@ -67,7 +93,7 @@ extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
     // This method is called when a remote peer invites this peer to join a session.
     // Only one peer is ever expected, so accept its invitation. Don't ask the user.
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        NSLog("%@", "didReceiveInvitationFromPeer \(peerID)")
+        NSLog("%@", "PLD about to accept invitation from \(peerID.displayName)")
         invitationHandler(true, self.session)
     }
 }
@@ -81,15 +107,15 @@ extension ServiceManager : MCNearbyServiceBrowserDelegate {
     // This method is called when the browser finds a remote peer advertising itself.
     // Only one peer is ever expected, so invite it to join a session. Don't ask the user.
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        NSLog("%@", "foundPeer: \(peerID)")
-        NSLog("%@", "invitePeer: \(peerID)")
+        NSLog("%@", "PLD found and about to invite peer: \(peerID.displayName)")
+        discoveredPeer(withUuid: info?["uuid"])
         browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
     }
     
     // This method is called when the peer goes away.
     // This situation needs to be handled eventually.
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        NSLog("%@", "lostPeer: \(peerID)")
+        NSLog("%@", "PLD lost peer: \(peerID.displayName)")
     }
     
 }
@@ -100,9 +126,9 @@ extension ServiceManager : MCSessionDelegate {
     // For now, connection means tell our delegate to segue to the "play" screen,
     // and disconnect means "oops."
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        NSLog("%@", "peer \(peerID) didChangeState: \(state.rawValue)")
         if state == .connected {
-            self.delegate?.connectedToOpponent()
+            NSLog("%@", "PLD \(peerID.displayName) connected")
+            connectedPeer()
         } else if state == .notConnected {
             self.delegate?.disconnectedFromOpponent()
         }
@@ -129,7 +155,7 @@ extension ServiceManager : MCSessionDelegate {
 
 protocol ServiceManagerDelegate {
     
-    func connectedToOpponent()
+    func connectedToOpponent(withRole: String)
     func disconnectedFromOpponent()
 }
 

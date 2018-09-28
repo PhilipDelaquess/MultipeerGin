@@ -27,9 +27,9 @@ class ViewController: UIViewController {
 }
 
 extension ViewController : ServiceManagerDelegate {
-    func connectedToOpponent() {
+    func connectedToOpponent(withRole role : String) {
         OperationQueue.main.addOperation {
-            self.statusLabel!.text = "Connected. Yay!"
+            self.statusLabel!.text = "Connected with role \(role). Yay!"
         }
     }
     
