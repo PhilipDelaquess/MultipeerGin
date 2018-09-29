@@ -20,6 +20,11 @@ class Group : NSObject {
         self.isFaceGroup = faceGroup
     }
     
+    override var description: String {
+        let contents = cards.map { $0.abbreviation }.joined(separator: " ")
+        return "[\(contents)]"
+    }
+    
     func getHelpers () -> Set<Card> {
         return isFaceGroup ? getSameFaceHelpers() : getSameSuitHelpers()
     }
