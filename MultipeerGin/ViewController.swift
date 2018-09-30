@@ -28,7 +28,8 @@ extension ViewController : ServiceManagerDelegate {
     func connectedToOpponent (asMaster master : Bool) {
         self.statusLabel!.text = "Connected with role \(master ? "master" : "slave"). Yay!"
         if master {
-            service.sendInitialGameState()
+            let deck = Card.shuffle(cards: Card.getAll())
+            service.sendInitialGameState(withDeck: deck)
         }
     }
 

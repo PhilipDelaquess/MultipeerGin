@@ -54,9 +54,15 @@ class ServiceManager : NSObject {
         send(dictionary: ["payloadType": "uuid", "uuid": localUuid])
     }
     
-    func sendInitialGameState () {
+    func sendInitialGameState (withDeck deck: [Card]) {
         NSLog("%@", "PLD sending initial game state to peer")
-        send(dictionary: ["payloadType": "initialGameState"])
+        let firstTen = deck[0...10].map { $0.abbreviation }.joined(separator: " ")
+        NSLog("%@", "PLD \(firstTen)")
+        let dict = [
+            "payloadType": "initialGameState",
+            "deck": deck.map { $0.abbreviation }
+        ] as [String : Any]
+        send(dictionary: dict)
     }
     
     // Low-level internal serializes a map and transmits it to connected peers.
@@ -79,6 +85,10 @@ class ServiceManager : NSObject {
             delegate?.connectedToOpponent(asMaster: uuid < localUuid)
         } else if payloadType == "initialGameState" {
             NSLog("%@", "PLD received initial game state")
+            let abbrevs = dictionary["deck"] as! [String]
+            let deck = abbrevs.map { Card.by(abbreviation: $0)! }
+            let firstTen = deck[0...10].map { $0.abbreviation }.joined(separator: " ")
+            NSLog("%@", "PLD \(firstTen)")
             delegate?.receivedInitialGameState()
         }
     }

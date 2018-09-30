@@ -27,7 +27,21 @@ class Card: NSObject {
     
     // Return a list of all Cards
     static func getAll () -> [Card] {
-        return [Card](allCards)
+        return shuffle(cards: allCards)
+    }
+    
+    static func shuffle (cards: [Card]) -> [Card] {
+        if cards.count < 2 {
+            return cards
+        }
+        var rv = [Card](cards)
+        for i in 0..<(rv.count - 1) {
+            let j = Int(arc4random_uniform(UInt32(rv.count - i))) + i
+            let x = rv[i]
+            rv[i] = rv[j]
+            rv[j] = x
+        }
+        return rv
     }
     
     
