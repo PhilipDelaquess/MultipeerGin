@@ -27,7 +27,24 @@ class Card: NSObject {
     
     // Return a list of all Cards
     static func getAll () -> [Card] {
-        return allCards.map { $0 }
+        return [Card](allCards)
+    }
+    
+    
+    static let faceComp = { (c1: Card, c2: Card) -> Bool in
+        if c1.ordinal != c2.ordinal {
+            return c1.ordinal < c2.ordinal
+        } else {
+            return c1.suit.rawValue < c2.suit.rawValue
+        }
+    }
+    
+    static let suitComp = { (c1: Card, c2: Card) -> Bool in
+        if c1.suit != c2.suit {
+            return c1.suit.rawValue < c2.suit.rawValue
+        } else {
+            return c1.ordinal < c2.ordinal
+        }
     }
     
     private static let allCards = Suit.allSuits.map { suit in

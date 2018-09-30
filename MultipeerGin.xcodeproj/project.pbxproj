@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D44D10412157E9B90053660F /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D10402157E9B90053660F /* GameState.swift */; };
 		D44D104321587BD50053660F /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D104221587BD50053660F /* Card.swift */; };
 		D44D104A2159C0A30053660F /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D10492159C0A30053660F /* Group.swift */; };
 		D44D104C2159C52F0053660F /* CardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D104B2159C52F0053660F /* CardTests.swift */; };
 		D44D104E2159C61A0053660F /* GroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D104D2159C61A0053660F /* GroupTests.swift */; };
+		D44D1050215DE1230053660F /* Melding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D104F215DE1230053660F /* Melding.swift */; };
+		D44D1052215DE2BF0053660F /* Hand.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1051215DE2BF0053660F /* Hand.swift */; };
+		D44D1054215F306F0053660F /* HandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1053215F306F0053660F /* HandTests.swift */; };
 		D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */; };
 		D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887022026B71700D11FF7 /* AppDelegate.swift */; };
 		D4E887052026B71700D11FF7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887042026B71700D11FF7 /* ViewController.swift */; };
@@ -34,11 +36,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D44D10402157E9B90053660F /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		D44D104221587BD50053660F /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		D44D10492159C0A30053660F /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		D44D104B2159C52F0053660F /* CardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTests.swift; sourceTree = "<group>"; };
 		D44D104D2159C61A0053660F /* GroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupTests.swift; sourceTree = "<group>"; };
+		D44D104F215DE1230053660F /* Melding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Melding.swift; sourceTree = "<group>"; };
+		D44D1051215DE2BF0053660F /* Hand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hand.swift; sourceTree = "<group>"; };
+		D44D1053215F306F0053660F /* HandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTests.swift; sourceTree = "<group>"; };
 		D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
 		D4E886FF2026B71700D11FF7 /* MultipeerGin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipeerGin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E887022026B71700D11FF7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -114,6 +118,7 @@
 				D4E887192026B71800D11FF7 /* Info.plist */,
 				D44D104B2159C52F0053660F /* CardTests.swift */,
 				D44D104D2159C61A0053660F /* GroupTests.swift */,
+				D44D1053215F306F0053660F /* HandTests.swift */,
 			);
 			path = MultipeerGinTests;
 			sourceTree = "<group>";
@@ -125,7 +130,8 @@
 				D4E8872620312FA100D11FF7 /* Face.swift */,
 				D44D104221587BD50053660F /* Card.swift */,
 				D44D10492159C0A30053660F /* Group.swift */,
-				D44D10402157E9B90053660F /* GameState.swift */,
+				D44D104F215DE1230053660F /* Melding.swift */,
+				D44D1051215DE2BF0053660F /* Hand.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -235,10 +241,11 @@
 			files = (
 				D4E8872720312FA100D11FF7 /* Face.swift in Sources */,
 				D4E887052026B71700D11FF7 /* ViewController.swift in Sources */,
+				D44D1050215DE1230053660F /* Melding.swift in Sources */,
 				D44D104321587BD50053660F /* Card.swift in Sources */,
 				D44D104A2159C0A30053660F /* Group.swift in Sources */,
 				D4E8872520312DFA00D11FF7 /* Suit.swift in Sources */,
-				D44D10412157E9B90053660F /* GameState.swift in Sources */,
+				D44D1052215DE2BF0053660F /* Hand.swift in Sources */,
 				D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */,
 				D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */,
 			);
@@ -248,6 +255,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D44D1054215F306F0053660F /* HandTests.swift in Sources */,
 				D4E887182026B71800D11FF7 /* MultipeerGinTests.swift in Sources */,
 				D44D104E2159C61A0053660F /* GroupTests.swift in Sources */,
 				D44D104C2159C52F0053660F /* CardTests.swift in Sources */,

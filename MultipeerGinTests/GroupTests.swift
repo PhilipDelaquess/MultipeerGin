@@ -45,8 +45,9 @@ class GroupTests: XCTestCase {
     func testSuitGroup () {
         let cards = [Card.by(abbreviation: "AS")!, Card.by(abbreviation: "2S")!]
         let group = Group(cards: cards, faceGroup: false)
-        let helpers = group.getHelpers()
+        XCTAssert(group.description == "[AS 2S]")
 
+        let helpers = group.getHelpers()
         XCTAssert(helpers.count == 1)
         XCTAssert(helpers.contains(Card.by(abbreviation: "3S")!))
     }
