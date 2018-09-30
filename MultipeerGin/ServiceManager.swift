@@ -49,37 +49,38 @@ class ServiceManager : NSObject {
         self.serviceBrowser.stopBrowsingForPeers()
     }
     
-    func send(colorName : String) {
-        NSLog("%@", "sendColor: \(colorName) to \(session.connectedPeers.count) peers")
-        
-        if session.connectedPeers.count > 0 {
-            do {
-                try self.session.send(colorName.data(using: .utf8)!, toPeers: session.connectedPeers, with: .reliable)
-            }
-            catch let error {
-                NSLog("%@", "Error for sending: \(error)")
-            }
-        }
-        
+    private func sendUuid () {
+        NSLog("%@", "PLD sending uuid to peer")
+        send(dictionary: ["payloadType": "uuid", "uuid": localUuid])
     }
     
-    func discoveredPeer(withUuid uuid : String?) {
-        remoteUuid = uuid
-        if remoteConnected {
-            notifyDelegate()
-        }
+    func sendInitialGameState () {
+        NSLog("%@", "PLD sending initial game state to peer")
+        send(dictionary: ["payloadType": "initialGameState"])
     }
     
-    func connectedPeer () {
-        remoteConnected = true
-        if remoteUuid != nil {
-            notifyDelegate()
+    // Low-level internal serializes a map and transmits it to connected peers.
+    private func send (dictionary: [String : Any]) {
+        let data = try! JSONSerialization.data(withJSONObject: dictionary, options: JSONSerialization.WritingOptions.prettyPrinted)
+        do {
+            try session.send(data, toPeers: session.connectedPeers, with: MCSessionSendDataMode.reliable)
+        }
+        catch let error {
+            NSLog("%@", "Error for sending: \(error)")
         }
     }
     
-    func notifyDelegate () {
-        let role = remoteUuid! > localUuid ? "slave" : "master"
-        self.delegate?.connectedToOpponent(withRole: role)
+    // Internal method called on the main thread handles a data dictionary sent by the peer.
+    private func receive (dictionary: [String : Any]) {
+        let payloadType = dictionary["payloadType"] as! String
+        if payloadType == "uuid" {
+            let uuid = dictionary["uuid"] as! String
+            NSLog("%@", "PLD received uuid \(uuid). Mine is \(localUuid)")
+            delegate?.connectedToOpponent(asMaster: uuid < localUuid)
+        } else if payloadType == "initialGameState" {
+            NSLog("%@", "PLD received initial game state")
+            delegate?.receivedInitialGameState()
+        }
     }
     
 }
@@ -108,7 +109,6 @@ extension ServiceManager : MCNearbyServiceBrowserDelegate {
     // Only one peer is ever expected, so invite it to join a session. Don't ask the user.
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         NSLog("%@", "PLD found and about to invite peer: \(peerID.displayName)")
-        discoveredPeer(withUuid: info?["uuid"])
         browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
     }
     
@@ -128,7 +128,7 @@ extension ServiceManager : MCSessionDelegate {
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         if state == .connected {
             NSLog("%@", "PLD \(peerID.displayName) connected")
-            connectedPeer()
+            sendUuid()
         } else if state == .notConnected {
             self.delegate?.disconnectedFromOpponent()
         }
@@ -137,6 +137,10 @@ extension ServiceManager : MCSessionDelegate {
     // The communication protocol
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         NSLog("%@", "didReceiveData: \(data)")
+        let dictionary = try! JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments) as! [String : Any]
+        OperationQueue.main.addOperation {
+            self.receive(dictionary: dictionary)
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
@@ -155,7 +159,8 @@ extension ServiceManager : MCSessionDelegate {
 
 protocol ServiceManagerDelegate {
     
-    func connectedToOpponent(withRole: String)
+    func connectedToOpponent(asMaster: Bool)
     func disconnectedFromOpponent()
+    func receivedInitialGameState()
 }
 

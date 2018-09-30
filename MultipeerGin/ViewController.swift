@@ -9,7 +9,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-    
+
     @IBOutlet weak var statusLabel: UILabel!
     let service = ServiceManager();
 
@@ -22,22 +22,21 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
 
 extension ViewController : ServiceManagerDelegate {
-    func connectedToOpponent(withRole role : String) {
-        OperationQueue.main.addOperation {
-            self.statusLabel!.text = "Connected with role \(role). Yay!"
+    func connectedToOpponent (asMaster master : Bool) {
+        self.statusLabel!.text = "Connected with role \(master ? "master" : "slave"). Yay!"
+        if master {
+            service.sendInitialGameState()
         }
     }
-    
-    func disconnectedFromOpponent() {
-        OperationQueue.main.addOperation {
-            self.statusLabel!.text = "Shit! Came unconnected"
-        }
+
+    func disconnectedFromOpponent () {
+        self.statusLabel!.text = "Shit! Came unconnected"
     }
-    
-    
+
+    func receivedInitialGameState () {
+        
+    }
 }
