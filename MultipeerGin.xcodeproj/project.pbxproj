@@ -14,6 +14,9 @@
 		D44D1050215DE1230053660F /* Melding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D104F215DE1230053660F /* Melding.swift */; };
 		D44D1052215DE2BF0053660F /* Hand.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1051215DE2BF0053660F /* Hand.swift */; };
 		D44D1054215F306F0053660F /* HandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1053215F306F0053660F /* HandTests.swift */; };
+		D44D10562161C82D0053660F /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D10552161C82D0053660F /* Deck.swift */; };
+		D44D1058216265570053660F /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1057216265570053660F /* Game.swift */; };
+		D44D105A216279C40053660F /* PlayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D1059216279C40053660F /* PlayerState.swift */; };
 		D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */; };
 		D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887022026B71700D11FF7 /* AppDelegate.swift */; };
 		D4E887052026B71700D11FF7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E887042026B71700D11FF7 /* ViewController.swift */; };
@@ -43,6 +46,9 @@
 		D44D104F215DE1230053660F /* Melding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Melding.swift; sourceTree = "<group>"; };
 		D44D1051215DE2BF0053660F /* Hand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hand.swift; sourceTree = "<group>"; };
 		D44D1053215F306F0053660F /* HandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTests.swift; sourceTree = "<group>"; };
+		D44D10552161C82D0053660F /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		D44D1057216265570053660F /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		D44D1059216279C40053660F /* PlayerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerState.swift; sourceTree = "<group>"; };
 		D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
 		D4E886FF2026B71700D11FF7 /* MultipeerGin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipeerGin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4E887022026B71700D11FF7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -132,6 +138,9 @@
 				D44D10492159C0A30053660F /* Group.swift */,
 				D44D104F215DE1230053660F /* Melding.swift */,
 				D44D1051215DE2BF0053660F /* Hand.swift */,
+				D44D10552161C82D0053660F /* Deck.swift */,
+				D44D1059216279C40053660F /* PlayerState.swift */,
+				D44D1057216265570053660F /* Game.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -241,12 +250,15 @@
 			files = (
 				D4E8872720312FA100D11FF7 /* Face.swift in Sources */,
 				D4E887052026B71700D11FF7 /* ViewController.swift in Sources */,
+				D44D10562161C82D0053660F /* Deck.swift in Sources */,
 				D44D1050215DE1230053660F /* Melding.swift in Sources */,
 				D44D104321587BD50053660F /* Card.swift in Sources */,
 				D44D104A2159C0A30053660F /* Group.swift in Sources */,
+				D44D1058216265570053660F /* Game.swift in Sources */,
 				D4E8872520312DFA00D11FF7 /* Suit.swift in Sources */,
 				D44D1052215DE2BF0053660F /* Hand.swift in Sources */,
 				D4E887032026B71700D11FF7 /* AppDelegate.swift in Sources */,
+				D44D105A216279C40053660F /* PlayerState.swift in Sources */,
 				D4747C2B2150A62F0044F0A6 /* ServiceManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

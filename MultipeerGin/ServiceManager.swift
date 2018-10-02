@@ -51,16 +51,15 @@ class ServiceManager : NSObject {
     
     private func sendUuid () {
         NSLog("%@", "PLD sending uuid to peer")
-        send(dictionary: ["payloadType": "uuid", "uuid": localUuid])
+        send(dictionary: ["payloadType" : "uuid", "uuid" : localUuid])
     }
     
-    func sendInitialGameState (withDeck deck: [Card]) {
+    func sendInitialGameState (deck: [Card], hand: [Card]) {
         NSLog("%@", "PLD sending initial game state to peer")
-        let firstTen = deck[0...10].map { $0.abbreviation }.joined(separator: " ")
-        NSLog("%@", "PLD \(firstTen)")
         let dict = [
-            "payloadType": "initialGameState",
-            "deck": deck.map { $0.abbreviation }
+            "payloadType" : "initialGameState",
+            "deck" : deck.map { $0.abbreviation },
+            "hand" : hand.map { $0.abbreviation }
         ] as [String : Any]
         send(dictionary: dict)
     }
@@ -85,11 +84,9 @@ class ServiceManager : NSObject {
             delegate?.connectedToOpponent(asMaster: uuid < localUuid)
         } else if payloadType == "initialGameState" {
             NSLog("%@", "PLD received initial game state")
-            let abbrevs = dictionary["deck"] as! [String]
-            let deck = abbrevs.map { Card.by(abbreviation: $0)! }
-            let firstTen = deck[0...10].map { $0.abbreviation }.joined(separator: " ")
-            NSLog("%@", "PLD \(firstTen)")
-            delegate?.receivedInitialGameState()
+            let deckAbbrs = dictionary["deck"] as! [String]
+            let handAbbrs = dictionary["hand"] as! [String]
+            delegate?.receivedInitialGameState(deckAbbrs: deckAbbrs, handAbbrs: handAbbrs)
         }
     }
     
@@ -171,6 +168,6 @@ protocol ServiceManagerDelegate {
     
     func connectedToOpponent(asMaster: Bool)
     func disconnectedFromOpponent()
-    func receivedInitialGameState()
+    func receivedInitialGameState(deckAbbrs: [String], handAbbrs: [String])
 }
 
