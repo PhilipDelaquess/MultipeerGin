@@ -137,8 +137,10 @@ extension ServiceManager : MCSessionDelegate {
             NSLog("%@", "PLD \(peerID.displayName) connected")
             sendUuid()
         } else if state == .notConnected {
-            self.delegate?.disconnectedFromOpponent()
-        }
+            OperationQueue.main.addOperation {
+                self.delegate?.disconnectedFromOpponent()
+            }
+       }
     }
     
     // The communication protocol
