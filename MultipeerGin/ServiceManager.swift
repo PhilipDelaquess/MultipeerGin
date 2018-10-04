@@ -64,6 +64,11 @@ class ServiceManager : NSObject {
         send(dictionary: dict)
     }
     
+    func sendRejectInitial () {
+        let dict = ["payloadType" : "rejectInitial"]
+        send(dictionary: dict)
+    }
+    
     // Low-level internal serializes a map and transmits it to connected peers.
     private func send (dictionary: [String : Any]) {
         let data = try! JSONSerialization.data(withJSONObject: dictionary, options: JSONSerialization.WritingOptions.prettyPrinted)
@@ -87,6 +92,9 @@ class ServiceManager : NSObject {
             let deckAbbrs = dictionary["deck"] as! [String]
             let handAbbrs = dictionary["hand"] as! [String]
             delegate?.receivedInitialGameState(deckAbbrs: deckAbbrs, handAbbrs: handAbbrs)
+        } else if payloadType == "rejectInitial" {
+            NSLog("%@", "PLD peer rejected initial discard")
+            delegate?.rejectedInitialDiscard()
         }
     }
     
@@ -168,8 +176,9 @@ extension ServiceManager : MCSessionDelegate {
 
 protocol ServiceManagerDelegate {
     
-    func connectedToOpponent(asMaster: Bool)
-    func disconnectedFromOpponent()
-    func receivedInitialGameState(deckAbbrs: [String], handAbbrs: [String])
+    func connectedToOpponent (asMaster: Bool)
+    func disconnectedFromOpponent ()
+    func receivedInitialGameState (deckAbbrs: [String], handAbbrs: [String])
+    func rejectedInitialDiscard ()
 }
 

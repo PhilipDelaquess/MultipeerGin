@@ -22,6 +22,13 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        statusLabel!.text = "Waiting for opponent to connect..."
+        deckButton.isHidden = true
+        discardButton.isHidden = true
+        noThanksButton.isHidden = true
+        for b in handButtons {
+            b.isHidden = true
+        }
         service = ServiceManager()
         service!.delegate = self
     }
@@ -35,7 +42,14 @@ class ViewController: UIViewController {
     }
 
     @IBAction func noThanksTapped(_ sender: UIButton) {
-        NSLog("%@", "No Thanks")
+        if let g = game {
+            if g.localPlayerState == .poneInitialDraw || g.localPlayerState == .dealerInitialDraw {
+                service!.sendRejectInitial()
+                g.peerPlayerState = g.localPlayerState == .poneInitialDraw ? .dealerInitialDraw : .poneSecondDraw
+                g.localPlayerState = .awaitingOpponentAction
+                displayGame()
+            }
+        }
     }
     
     @IBAction func handTapped(_ sender: UIButton) {
@@ -44,6 +58,12 @@ class ViewController: UIViewController {
     
     private func displayGame () {
         if let g = self.game {
+            deckButton.isHidden = false
+            discardButton.isHidden = false
+            noThanksButton.isHidden = false
+            for b in handButtons {
+                b.isHidden = false
+            }
             deckButton.setTitle("\(g.deck.cards.count)", for: UIControlState.normal)
             populateButton(discardButton, withCard: g.discard[0])
             slotCardsIntoButtons(melding: g.hand.meldings[0])
@@ -55,12 +75,20 @@ class ViewController: UIViewController {
             case .poneInitialDraw:
                 status = "Opponent dealt. Tap the \(g.discard[0].unicode) if you want it."
                 noThanksButton.isHidden = false
+            case .dealerInitialDraw:
+                status = "Opponent does not want the \(g.discard[0].unicode). Tap it if you want it."
+                noThanksButton.isHidden = false
+            case .poneSecondDraw:
+                status = "Dealer does not want it either. Tap the deck to draw."
+                noThanksButton.isHidden = true
             default:
                 status = "TODO"
-                noThanksButton.isHidden = false
+                noThanksButton.isHidden = true
             }
             handButtons[10].isHidden = true
             statusLabel!.text = status
+        } else {
+            // no game yet
         }
     }
     
@@ -106,5 +134,13 @@ extension ViewController : ServiceManagerDelegate {
         let hand = Hand(cards: handAbbrs.map { Card.by(abbreviation: $0)! })
         game = Game(deck: deck, hand: hand, asDealer: false)
         displayGame()
+    }
+    
+    func rejectedInitialDiscard () {
+        if let g = game {
+            g.localPlayerState = g.peerPlayerState == .poneInitialDraw ? .dealerInitialDraw : .poneSecondDraw
+            g.peerPlayerState = .awaitingOpponentAction
+            displayGame()
+        }
     }
 }

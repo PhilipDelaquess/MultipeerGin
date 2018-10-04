@@ -12,6 +12,7 @@ enum PlayerState {
     case awaitingOpponentAction
     case poneInitialDraw
     case dealerInitialDraw
+    case poneSecondDraw
     case normalDraw
     case discardOrKnock
     case acknowledgeDeal
