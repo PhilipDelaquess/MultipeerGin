@@ -15,6 +15,19 @@ class Card: NSObject {
     let ordinal: Int
     let score: Int
     
+    let unicodeSuits: [Character : String] = [
+        "C" : "\u{2667}",
+        "D" : "\u{2662}",
+        "H" : "\u{2661}",
+        "S" : "\u{2664}"
+    ]
+    
+    var unicode : String  {
+        get {
+            return face.rawValue + unicodeSuits[suit.rawValue]!
+        }
+    }
+
     // Return the Card with the given abbreviation, if any
     static func by (abbreviation: String) -> Card? {
         return byAbbreviation[abbreviation]
