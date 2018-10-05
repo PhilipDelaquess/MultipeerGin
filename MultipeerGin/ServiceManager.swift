@@ -10,67 +10,51 @@ import Foundation
 import MultipeerConnectivity
 
 class ServiceManager : NSObject {
-    
+
     private let ServiceType = "pld-gin-game"
     private let myPeerId = MCPeerID(displayName: UIDevice.current.name)
     private let serviceAdvertiser : MCNearbyServiceAdvertiser
     private let serviceBrowser : MCNearbyServiceBrowser
-    
+
     private let localUuid = UUID().uuidString.lowercased()
     private var remoteUuid: String?
     private var remoteConnected = false
-    
+
     lazy var session : MCSession = {
         let session = MCSession(peer: self.myPeerId, securityIdentity: nil, encryptionPreference: .required)
         session.delegate = self
         return session
     }()
-    
+
     var delegate : ServiceManagerDelegate?
-    
+
     override init () {
         let info = ["uuid" : localUuid]
         self.serviceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerId, discoveryInfo: info, serviceType: ServiceType)
         self.serviceBrowser = MCNearbyServiceBrowser(peer: myPeerId, serviceType: ServiceType)
-        
+
         super.init()
-        
+
         self.serviceAdvertiser.delegate = self
         NSLog("%@", "PLD about to start advertising")
         self.serviceAdvertiser.startAdvertisingPeer()
-        
+
         self.serviceBrowser.delegate = self
         NSLog("%@", "PLD about to start browsing")
         self.serviceBrowser.startBrowsingForPeers()
     }
-    
+
     deinit {
         self.serviceAdvertiser.stopAdvertisingPeer()
         self.serviceBrowser.stopBrowsingForPeers()
     }
-    
+
     private func sendUuid () {
         NSLog("%@", "PLD sending uuid to peer")
         send(dictionary: ["payloadType" : "uuid", "uuid" : localUuid])
     }
-    
-    func sendInitialGameState (deck: [Card], hand: [Card]) {
-        NSLog("%@", "PLD sending initial game state to peer")
-        let dict = [
-            "payloadType" : "initialGameState",
-            "deck" : deck.map { $0.abbreviation },
-            "hand" : hand.map { $0.abbreviation }
-        ] as [String : Any]
-        send(dictionary: dict)
-    }
-    
-    func sendRejectInitial () {
-        let dict = ["payloadType" : "rejectInitial"]
-        send(dictionary: dict)
-    }
-    
-    // Low-level internal serializes a map and transmits it to connected peers.
-    private func send (dictionary: [String : Any]) {
+
+    func send (dictionary: [String : Any]) {
         let data = try! JSONSerialization.data(withJSONObject: dictionary, options: JSONSerialization.WritingOptions.prettyPrinted)
         do {
             try session.send(data, toPeers: session.connectedPeers, with: MCSessionSendDataMode.reliable)
@@ -79,7 +63,7 @@ class ServiceManager : NSObject {
             NSLog("%@", "Error for sending: \(error)")
         }
     }
-    
+
     // Internal method called on the main thread handles a data dictionary sent by the peer.
     private func receive (dictionary: [String : Any]) {
         let payloadType = dictionary["payloadType"] as! String
@@ -87,25 +71,18 @@ class ServiceManager : NSObject {
             let uuid = dictionary["uuid"] as! String
             NSLog("%@", "PLD received uuid \(uuid). Mine is \(localUuid)")
             delegate?.connectedToOpponent(asMaster: uuid < localUuid)
-        } else if payloadType == "initialGameState" {
-            NSLog("%@", "PLD received initial game state")
-            let deckAbbrs = dictionary["deck"] as! [String]
-            let handAbbrs = dictionary["hand"] as! [String]
-            delegate?.receivedInitialGameState(deckAbbrs: deckAbbrs, handAbbrs: handAbbrs)
-        } else if payloadType == "rejectInitial" {
-            NSLog("%@", "PLD peer rejected initial discard")
-            delegate?.rejectedInitialDiscard()
+        } else {
+            delegate?.receivedData(dictionary: dictionary)
         }
     }
-    
 }
 
 extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
-    
+
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
         NSLog("%@", "didNotStartAdvertisingPeer: \(error)")
     }
-    
+
     // This method is called when a remote peer invites this peer to join a session.
     // Only one peer is ever expected, so accept its invitation. Don't ask the user.
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
@@ -115,28 +92,27 @@ extension ServiceManager : MCNearbyServiceAdvertiserDelegate {
 }
 
 extension ServiceManager : MCNearbyServiceBrowserDelegate {
-    
+
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
         NSLog("%@", "didNotStartBrowsingForPeers: \(error)")
     }
-    
+
     // This method is called when the browser finds a remote peer advertising itself.
     // Only one peer is ever expected, so invite it to join a session. Don't ask the user.
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         NSLog("%@", "PLD found and about to invite peer: \(peerID.displayName)")
         browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
     }
-    
+
     // This method is called when the peer goes away.
     // This situation needs to be handled eventually.
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         NSLog("%@", "PLD lost peer: \(peerID.displayName)")
     }
-    
 }
 
 extension ServiceManager : MCSessionDelegate {
-    
+
     // This method is called when the remote peer connects or disconnects.
     // For now, connection means tell our delegate to segue to the "play" screen,
     // and disconnect means "oops."
@@ -150,7 +126,7 @@ extension ServiceManager : MCSessionDelegate {
             }
        }
     }
-    
+
     // The communication protocol
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         NSLog("%@", "didReceiveData: \(data)")
@@ -159,26 +135,23 @@ extension ServiceManager : MCSessionDelegate {
             self.receive(dictionary: dictionary)
         }
     }
-    
+
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         NSLog("%@", "didReceiveStream")
     }
-    
+
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
         NSLog("%@", "didStartReceivingResourceWithName")
     }
-    
+
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
         NSLog("%@", "didFinishReceivingResourceWithName")
     }
-    
 }
 
 protocol ServiceManagerDelegate {
-    
+
     func connectedToOpponent (asMaster: Bool)
     func disconnectedFromOpponent ()
-    func receivedInitialGameState (deckAbbrs: [String], handAbbrs: [String])
-    func rejectedInitialDiscard ()
+    func receivedData (dictionary: [String : Any])
 }
-

@@ -107,12 +107,12 @@
 			children = (
 				D4E8872320312DCA00D11FF7 /* Model */,
 				D4E887022026B71700D11FF7 /* AppDelegate.swift */,
+				D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */,
 				D4E887042026B71700D11FF7 /* ViewController.swift */,
 				D4E887062026B71700D11FF7 /* Main.storyboard */,
 				D4E887092026B71700D11FF7 /* Assets.xcassets */,
 				D4E8870B2026B71700D11FF7 /* LaunchScreen.storyboard */,
 				D4E8870E2026B71800D11FF7 /* Info.plist */,
-				D4747C2A2150A62F0044F0A6 /* ServiceManager.swift */,
 			);
 			path = MultipeerGin;
 			sourceTree = "<group>";

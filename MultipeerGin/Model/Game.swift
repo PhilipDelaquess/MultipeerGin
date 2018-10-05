@@ -10,20 +10,18 @@ import UIKit
 
 class Game: NSObject {
     
-    var deck: Deck
-    var discard: [Card]
-    var hand: Hand
-    var localPlayerState: PlayerState
-    var peerPlayerState: PlayerState
+    var deck: Deck?
+    var discard: [Card]?
+    var hand: Hand?
+    var localPlayerState = PlayerState.awaitingOpponentArrival
+    var peerPlayerState = PlayerState.awaitingOpponentArrival
 
-    init (deck: Deck, hand: Hand, asDealer: Bool) {
+    func initialize (deck: Deck, hand: Hand, asDealer: Bool) {
         self.deck = deck
         self.discard = [Card]()
-        self.discard.append(deck.dealOne())
+        self.discard!.append(deck.dealOne())
         self.hand = hand
         self.localPlayerState = asDealer ? .awaitingOpponentAction : .poneInitialDraw
         self.peerPlayerState = asDealer ? .poneInitialDraw : .awaitingOpponentAction
-        
-        super.init()
     }
 }
