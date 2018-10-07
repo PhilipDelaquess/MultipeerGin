@@ -10,6 +10,8 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    private let knockMax = 30 // really 10
+
     var service: ServiceManager?
 
     @IBOutlet weak var statusLabel: UILabel!
@@ -30,6 +32,7 @@ class ViewController: UIViewController {
     private let DrawDeck = "drawDeck"
     private let DrawDiscard = "drawDiscard"
     private let Discard = "discard"
+    private let Knock = "knock"
     private let DiscardAbbrev = "abbrev"
 
     override func viewDidLoad() {
@@ -100,18 +103,42 @@ class ViewController: UIViewController {
     @IBAction func handTapped(_ sender: UIButton) {
         if let g = game {
             if g.localPlayerState == .discardOrKnock {
-                g.localPlayerState = .awaitingOpponentAction
-                g.peerPlayerState = .normalDraw
                 let c = buttonContents[sender.tag]
                 g.hand!.discard(card: c)
                 g.discard!.insert(c, at: 0)
-                let dict = [
-                    PayloadType : Discard,
-                    DiscardAbbrev : c.abbreviation
-                ]
-                service!.send(dictionary: dict)
-                populateDiscardButton()
                 populateCardButtons()
+                let points = g.hand!.meldings[0].score
+                if points > knockMax {
+                    doDiscard(c, withKnock: false)
+                } else {
+                    let alert = UIAlertController(title: "Knock?", message: "Do you want to knock with \(points) points?", preferredStyle: UIAlertControllerStyle.alert)
+                    let yesAction = UIAlertAction(title: "Yes!", style: UIAlertActionStyle.default, handler: {(UIAlertAction) -> Void in
+                        self.doDiscard(c, withKnock: true)
+                    })
+                    alert.addAction(yesAction)
+                    let noAction = UIAlertAction(title: "Not Yet", style: UIAlertActionStyle.default, handler: {(UIAlertAction) -> Void in
+                        self.doDiscard(c, withKnock: false)
+                    })
+                    alert.addAction(noAction)
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+
+    private func doDiscard(_ card: Card, withKnock: Bool) {
+        if let g = game {
+            let dict = [
+                PayloadType : withKnock ? Knock : Discard,
+                DiscardAbbrev : card.abbreviation
+            ]
+            service!.send(dictionary: dict)
+            if withKnock {
+                statusLabel!.text = "OK, you knocked. Now what?"
+            } else {
+                g.localPlayerState = .awaitingOpponentAction
+                g.peerPlayerState = .normalDraw
+                populateDiscardButton()
                 statusLabel!.text = "Waiting for opponent to draw..."
             }
         }
@@ -208,6 +235,10 @@ class ViewController: UIViewController {
         }
     }
 
+    func knocked () {
+        statusLabel!.text = "Opponent knocked. Now what?"
+    }
+
     // MARK: - UI updaters
 
     private func populateDeckButton () {
@@ -283,6 +314,8 @@ extension ViewController : ServiceManagerDelegate {
             drewDeck()
         } else if payloadType == Discard {
             discarded(card: Card.by(abbreviation: dictionary[DiscardAbbrev] as! String)!)
+        } else if payloadType == Knock {
+            knocked()
         }
     }
 }
