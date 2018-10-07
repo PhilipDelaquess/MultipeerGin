@@ -11,15 +11,25 @@ import Foundation
 class Hand: NSObject {
     var cards: [Card]
     var meldings: [Melding]
-    
+
     init (cards: [Card]) {
         self.cards = cards.sorted(by: Card.faceComp)
         self.meldings = Array()
         super.init()
-        
+
         findMeldings()
     }
-    
+
+    func draw (card: Card) {
+        cards.append(card)
+        findMeldings()
+    }
+
+    func discard (card: Card) {
+        cards = cards.filter { $0 != card }
+        findMeldings()
+    }
+
     private func findMeldings () {
         var cards = Array(self.cards)
         var melds = [Group]()
@@ -27,7 +37,7 @@ class Hand: NSObject {
         findMeldingsAux(&cards, &melds)
         self.meldings.sort(by: { $0.score < $1.score })
     }
-    
+
     // Recursive function with side effects
     //
     // cards: the cards to try to group into melds, not including cards already melded
@@ -39,9 +49,11 @@ class Hand: NSObject {
     //
     private func findMeldingsAux (_ cards: inout [Card], _ melds: inout [Group]) {
         // find all possible melds, regardless of overlap
-        let localMelds = findSuitMelds(cards.sorted(by: Card.suitComp))
-            + findFaceMelds(cards.sorted(by: Card.faceComp))
-        
+        cards = cards.sorted(by: Card.suitComp)
+        var localMelds = findSuitMelds(cards)
+        cards = cards.sorted(by: Card.faceComp)
+        localMelds += findFaceMelds(cards)
+
         // map each card to a list of the melds it belongs to
         var meldsByCard = [Card : [Group]]()
         for c in cards {
@@ -52,10 +64,10 @@ class Hand: NSObject {
                 meldsByCard[c]!.append(lm)
             }
         }
-        
+
         // bad cards, or badz, are cards that belong to more than one meld
         let badz = Set(cards.filter() { meldsByCard[$0]!.count > 1 })
-        
+
         // clean melds have no bad cards; dirty melds have at least one
         var cleanMelds = [Group]()
         var dirtyMelds = [Group]()
@@ -72,13 +84,13 @@ class Hand: NSObject {
                 cleanMelds.append(lm)
             }
         }
-        
+
         // add clean melds to our output, and eliminate their cards from further consideration
         for cm in cleanMelds {
             melds.append(cm)
             cards = removeCards(inGroup: cm, fromArray: cards)
         }
-        
+
         if dirtyMelds.isEmpty {
             // recursion has bottomed out -- melds seen so far plus cards left over make a melding
             meldings.append(Melding(melds: melds, deadwood: cards))
@@ -93,7 +105,7 @@ class Hand: NSObject {
             }
         }
     }
-    
+
     private func findSuitMelds (_ cards: [Card]) -> [Group] {
         var rv = [Group]()
         var i = 0
@@ -135,10 +147,9 @@ class Hand: NSObject {
         }
         return rv
     }
-    
+
     private func removeCards (inGroup group: Group, fromArray cards: [Card]) -> [Card] {
         let crdz = Set(group.cards)
         return cards.filter() { !crdz.contains($0) }
     }
-    
 }

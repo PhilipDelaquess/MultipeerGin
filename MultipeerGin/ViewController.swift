@@ -18,7 +18,19 @@ class ViewController: UIViewController {
     @IBOutlet weak var noThanksButton: UIButton!
     @IBOutlet var handButtons: [UIButton]!
 
+    var buttonContents = [Card]()
+
     var game: Game?
+
+    private let PayloadType = "payloadType"
+    private let InitialGameState = "initialGameState"
+    private let InitialDeck = "deck"
+    private let InitialHand = "hand"
+    private let RejectInitial = "rejectInitial"
+    private let DrawDeck = "drawDeck"
+    private let DrawDiscard = "drawDiscard"
+    private let Discard = "discard"
+    private let DiscardAbbrev = "abbrev"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,11 +50,36 @@ class ViewController: UIViewController {
     // MARK: - user actions
 
     @IBAction func deckTapped(_ sender: UIButton) {
-        NSLog("%@", "Deck")
+        if let g = game {
+            if g.localPlayerState == .poneSecondDraw || g.localPlayerState == .normalDraw {
+                g.localPlayerState = .discardOrKnock
+                let dict = [PayloadType : DrawDeck]
+                service!.send(dictionary: dict)
+                let c = g.deck!.cards.removeFirst()
+                g.hand!.draw(card: c)
+                populateDeckButton()
+                populateCardButtons(withDraw: c)
+                statusLabel!.text = "Tap the card you want to discard."
+            }
+        }
     }
 
     @IBAction func discardTapped(_ sender: UIButton) {
-        NSLog("%@", "Discard")
+        if let g = game {
+            if g.localPlayerState == .poneInitialDraw || g.localPlayerState == .dealerInitialDraw || g.localPlayerState == .normalDraw {
+                if g.discard!.count > 0 {
+                    g.localPlayerState = .discardOrKnock
+                    let dict = [PayloadType : DrawDiscard]
+                    service!.send(dictionary: dict)
+                    let c = g.discard!.removeFirst()
+                    g.hand!.draw(card: c)
+                    noThanksButton.isHidden = true
+                    populateDiscardButton()
+                    populateCardButtons(withDraw: c)
+                    statusLabel!.text = "Tap the card you want to discard."
+                }
+            }
+        }
     }
 
     @IBAction func noThanksTapped(_ sender: UIButton) {
@@ -50,16 +87,34 @@ class ViewController: UIViewController {
             if g.localPlayerState == .poneInitialDraw || g.localPlayerState == .dealerInitialDraw {
                 g.peerPlayerState = g.localPlayerState == .poneInitialDraw ? .dealerInitialDraw : .poneSecondDraw
                 g.localPlayerState = .awaitingOpponentAction
-                let dict = ["payloadType" : "rejectInitial"]
+                let dict = [PayloadType : RejectInitial]
                 service!.send(dictionary: dict)
                 noThanksButton.isHidden = true
-                populateStatusLabel()
+                statusLabel!.text = g.peerPlayerState == .dealerInitialDraw
+                    ? "Offering initial discard to dealer..."
+                    : "Opponent must draw from deck..."
             }
         }
     }
 
     @IBAction func handTapped(_ sender: UIButton) {
-        NSLog("%@", "Card in slot \(sender.tag)")
+        if let g = game {
+            if g.localPlayerState == .discardOrKnock {
+                g.localPlayerState = .awaitingOpponentAction
+                g.peerPlayerState = .normalDraw
+                let c = buttonContents[sender.tag]
+                g.hand!.discard(card: c)
+                g.discard!.insert(c, at: 0)
+                let dict = [
+                    PayloadType : Discard,
+                    DiscardAbbrev : c.abbreviation
+                ]
+                service!.send(dictionary: dict)
+                populateDiscardButton()
+                populateCardButtons()
+                statusLabel!.text = "Waiting for opponent to draw..."
+            }
+        }
     }
 
     // MARK: - remote peer actions
@@ -70,9 +125,9 @@ class ViewController: UIViewController {
         let myHand = Hand(cards: deck.dealTen())
 
         let dict = [
-            "payloadType" : "initialGameState",
-            "deck" : deck.cards.map { $0.abbreviation },
-            "hand" : oppHand.map { $0.abbreviation }
+            PayloadType : InitialGameState,
+            InitialDeck : deck.cards.map { $0.abbreviation },
+            InitialHand : oppHand.map { $0.abbreviation }
         ] as [String : Any]
         service?.send(dictionary: dict)
 
@@ -88,7 +143,7 @@ class ViewController: UIViewController {
         populateDeckButton()
         populateDiscardButton()
         populateCardButtons()
-        populateStatusLabel()
+        statusLabel!.text = "You dealt. Offering top discard to opponent..."
     }
 
     func sentInitialGameState (deckAbbrs: [String], handAbbrs: [String]) {
@@ -108,7 +163,7 @@ class ViewController: UIViewController {
         populateDeckButton()
         populateDiscardButton()
         populateCardButtons()
-        populateStatusLabel()
+        statusLabel!.text = "Opponent dealt. Tap top discard if you want it."
     }
 
     func rejectedInitialDiscard () {
@@ -116,11 +171,40 @@ class ViewController: UIViewController {
             if g.peerPlayerState == .poneInitialDraw {
                 g.localPlayerState = .dealerInitialDraw
                 noThanksButton.isHidden = false
+                statusLabel!.text = "Opponent does not want top discard. Tap it if you want it."
             } else {
                 g.localPlayerState = .poneSecondDraw
+                statusLabel!.text = "Dealer doesn't want it either. Tap the deck to draw."
             }
             g.peerPlayerState = .awaitingOpponentAction
-            populateStatusLabel()
+        }
+    }
+
+    func drewTopDiscard () {
+        if let g = game {
+            g.peerPlayerState = .discardOrKnock
+            g.discard!.removeFirst()
+            populateDiscardButton()
+            statusLabel!.text = "Waiting for opponent to discard..."
+        }
+    }
+
+    func drewDeck () {
+        if let g = game {
+            g.peerPlayerState = .discardOrKnock
+            g.deck!.cards.removeFirst()
+            populateDeckButton()
+            statusLabel!.text = "Waiting for opponent to discard..."
+        }
+    }
+
+    func discarded (card: Card) {
+        if let g = game {
+            g.localPlayerState = .normalDraw
+            g.peerPlayerState = .awaitingOpponentAction
+            g.discard!.insert(card, at: 0)
+            populateDiscardButton()
+            statusLabel!.text = "Your turn. Tap deck or discard pile to draw."
         }
     }
 
@@ -138,57 +222,32 @@ class ViewController: UIViewController {
         if let g = game {
             if let discard = g.discard {
                 if discard.isEmpty {
-                    discardButton.setTitle(" ", for: UIControlState.normal)
+                    discardButton.setTitle("--", for: UIControlState.normal)
                 } else {
-                    populateButton(discardButton, withCard: discard[0])
+                    populateCardButton(discardButton, withCard: discard[0], asRecent: false)
                 }
             }
         }
     }
 
-    private func populateCardButtons () {
+    private func populateCardButtons (withDraw card: Card? = nil) {
         if let g = game {
             if let hand = g.hand {
-                for ix in 0 ..< 10 {
-                    populateButton(handButtons[ix], withCard: hand.meldings[0].cards[ix])
+                buttonContents.removeAll()
+                for ix in 0 ..< hand.cards.count {
+                    let c = hand.meldings[0].cards[ix]
+                    populateCardButton(handButtons[ix], withCard: c, asRecent: card == c)
+                    buttonContents.append(c)
                 }
+                handButtons[10].isHidden = hand.cards.count < 11
             }
         }
     }
 
-    private func populateStatusLabel () {
-        if let g = game {
-            var status: String
-            switch g.localPlayerState {
-            case .awaitingOpponentAction:
-                switch g.peerPlayerState {
-                case .poneInitialDraw:
-                    status = "You dealt. Offering top discard to opponent..."
-                case .dealerInitialDraw:
-                    status = "Offering top discard to dealer..."
-                case .poneSecondDraw:
-                    status = "Opponent must draw from deck..."
-                case .normalDraw:
-                    status = "Waiting for opponent to draw..."
-                default:
-                    status = "Waiting for opponent to discard..."
-                }
-            case .poneInitialDraw:
-                status = "Opponent dealt. Tap the \(g.discard![0].unicode) if you want it."
-            case .dealerInitialDraw:
-                status = "Opponent does not want the \(g.discard![0].unicode). Tap it if you want it."
-            case .poneSecondDraw:
-                status = "Dealer does not want it either. Tap the deck to draw."
-            default:
-                status = "TODO"
-            }
-            statusLabel!.text = status
-        }
-    }
-
-    private func populateButton (_ button: UIButton, withCard card: Card) {
+    private func populateCardButton (_ button: UIButton, withCard card: Card, asRecent recent: Bool) {
         button.setTitle(card.unicode, for: UIControlState.normal)
         button.setTitleColor(card.suit == .hearts || card.suit == .diamonds ? UIColor.red : UIColor.black, for: UIControlState.normal)
+        button.backgroundColor = recent ? UIColor.yellow : UIColor.white
     }
 
     override func didReceiveMemoryWarning() {
@@ -211,13 +270,19 @@ extension ViewController : ServiceManagerDelegate {
     }
 
     func receivedData (dictionary: [String : Any]) {
-        let payloadType = dictionary["payloadType"] as! String
-        if payloadType == "initialGameState" {
-            let deckAbbrs = dictionary["deck"] as! [String]
-            let handAbbrs = dictionary["hand"] as! [String]
+        let payloadType = dictionary[PayloadType] as! String
+        if payloadType == InitialGameState {
+            let deckAbbrs = dictionary[InitialDeck] as! [String]
+            let handAbbrs = dictionary[InitialHand] as! [String]
             sentInitialGameState(deckAbbrs: deckAbbrs, handAbbrs: handAbbrs)
-        } else if payloadType == "rejectInitial" {
+        } else if payloadType == RejectInitial {
             rejectedInitialDiscard()
+        } else if payloadType == DrawDiscard {
+            drewTopDiscard()
+        } else if payloadType == DrawDeck {
+            drewDeck()
+        } else if payloadType == Discard {
+            discarded(card: Card.by(abbreviation: dictionary[DiscardAbbrev] as! String)!)
         }
     }
 }
